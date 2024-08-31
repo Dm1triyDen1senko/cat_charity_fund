@@ -36,7 +36,6 @@ async def investment_process(
             obj_in.full_amount - obj_in.invested_amount,
         )
 
-
         db_obj.invested_amount += available_funds
         obj_in.invested_amount += available_funds
 
