@@ -1,5 +1,3 @@
-# Может быть избыточно!!!
-
 from typing import Optional
 
 from fastapi.encoders import jsonable_encoder

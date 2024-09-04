@@ -1,8 +1,10 @@
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.charity_project import charity_project_crud
 from app.models import CharityProject
+from app.api.exceptions import (
+    BadRequestException, UnproccesableEntityException, NotFoundException
+)
 
 
 async def check_name_is_duplicate(
@@ -13,10 +15,7 @@ async def check_name_is_duplicate(
     )
 
     if project_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Такой проект уже есть!",
-        )
+        raise BadRequestException('Такой проект уже есть!')
 
 
 async def check_charity_project_exists(
@@ -25,32 +24,25 @@ async def check_charity_project_exists(
     charity_project = await charity_project_crud.get(project_id, session)
 
     if charity_project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Такого проекта нет!"
-        )
+        raise NotFoundException('Такого проекта нет!')
 
     return charity_project
 
 
 async def check_charity_project_closed_or_invested(project: CharityProject):
     if project.invested_amount > 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="В проект уже внесены средства!",
-        )
+        raise BadRequestException('В проект уже внесены средства!')
 
     if project.close_date is not None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="В проект внесены все средства, зачем его удалять!",
+        raise BadRequestException(
+            'В проект внесены все средства, зачем его удалять!'
         )
 
 
 async def check_charity_project_has_full_investments(project: CharityProject):
     if project.fully_invested:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Уже закрытый проект не подлежит редактированию!",
+        raise BadRequestException(
+            'Уже закрытый проект не подлежит редактированию!'
         )
 
 
@@ -58,7 +50,6 @@ async def check_new_full_amount_is_not_less_than_invested(
     new_full_amount: int, project: CharityProject
 ) -> None:
     if new_full_amount < project.invested_amount:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Требуемая сумма не может быть меньше уже внесённой суммы!",
+        raise UnproccesableEntityException(
+            'Требуемая сумма не может быть меньше уже внесённой суммы!'
         )
