@@ -26,12 +26,11 @@ async def get_report(
     wrapper_services: Aiogoogle = Depends(get_service)
 ):
     """Только для суперюзеров!"""
-    # projects = await CRUDCharityProject.get_projects_by_completion_rate(
-    #     session
-    # )
-
     charity_project_crud = CRUDCharityProject(CharityProject)
-    projects = await charity_project_crud.get_projects_by_completion_rate(session)
+
+    projects = await charity_project_crud.get_projects_by_completion_rate(
+        session
+    )
 
     spreadsheet_id = await spreadsheets_create(wrapper_services)
 
